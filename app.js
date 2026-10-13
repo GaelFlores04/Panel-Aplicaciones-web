@@ -1,6 +1,5 @@
-// =====================================================
 // 1. ELEMENTOS DE LA PÁGINA
-// =====================================================
+
 const API = "https://dummyjson.com";
 
 const vistaLogin = document.querySelector("#vista-login");
@@ -23,17 +22,17 @@ const buscador = document.querySelector("#buscador");
 const errorTareas = document.querySelector("#error-tareas");
 const lista = document.querySelector("#lista");
 
-// =====================================================
+
 // 2. ESTADO (lo que la página recuerda)
-// =====================================================
+
 let usuario = null;
 let tareas = [];
 let filtro = "todas"; // todas | pendientes | completadas
 let busqueda = "";
 
-// =====================================================
+
 // 3. FUNCIONES AUXILIARES
-// =====================================================
+
 function mostrarVista(nombre) {
   vistaLogin.hidden = nombre !== "login";
   vistaPanel.hidden = nombre !== "panel";
@@ -64,9 +63,9 @@ function conJSON(metodo, datos) {
   };
 }
 
-// =====================================================
+
 // 4. SESIÓN
-// =====================================================
+
 async function iniciarSesion(event) {
   event.preventDefault();
   mostrarMensaje(errorLogin, "");
@@ -100,9 +99,9 @@ function cerrarSesion(mensaje = "") {
   mostrarVista("login");
 }
 
-// =====================================================
+
 // 5. PERFIL
-// =====================================================
+
 function pintarPerfil() {
   const { image, firstName, lastName, email, phone, address } = usuario;
   const ciudad = address?.city ?? "Sin registrar";
@@ -143,9 +142,9 @@ async function cargarPanel() {
   }
 }
 
-// =====================================================
+
 // 6. TAREAS: PEDIR Y PINTAR
-// =====================================================
+
 async function cargarTareas() {
   try {
     const { todos } = await pedir(`${API}/todos/user/${usuario.id}`);
@@ -173,6 +172,7 @@ function crearItem(tarea) {
   const check = document.createElement("input");
   check.type = "checkbox";
   check.checked = tarea.completed;
+  check.addEventListener("change", () => cambiarEstado(tarea.id));
 
   const texto = document.createElement("span");
   texto.textContent = tarea.todo;
@@ -180,6 +180,7 @@ function crearItem(tarea) {
   const btnEliminar = document.createElement("button");
   btnEliminar.type = "button";
   btnEliminar.textContent = "Eliminar";
+  btnEliminar.addEventListener("click", () => eliminarTarea(tarea.id));
 
   li.append(check, texto, btnEliminar);
   return li;
@@ -205,11 +206,75 @@ function pintarTareas() {
   visibles.forEach((t) => lista.append(crearItem(t)));
 }
 
-// =====================================================
+
+// 7. TAREAS: ACCIONES
+// DummyJSON no guarda nada, así que si el servidor responde bien,
+// actualizamos nuestro arreglo "tareas".
+// Las tareas nuevas tienen local: true porque no existen en el servidor.
+
+async function agregarTarea(event) {
+  event.preventDefault();
+  const texto = inputNuevaTarea.value.trim();
+  if (texto === "") {
+    mostrarMensaje(errorTareas, "Escribe una tarea antes de agregar");
+    return;
+  }
+  mostrarMensaje(errorTareas, "");
+
+  try {
+    const nueva = await pedir(
+      `${API}/todos/add`,
+      conJSON("POST", { todo: texto, completed: false, userId: usuario.id })
+    );
+    // El servidor responde siempre el mismo id, por eso creamos uno propio
+    tareas = [{ ...nueva, id: Date.now(), local: true }, ...tareas];
+    inputNuevaTarea.value = "";
+  } catch (error) {
+    mostrarMensaje(errorTareas, "No se pudo agregar la tarea");
+  } finally {
+    pintarTareas();
+  }
+}
+
+async function cambiarEstado(id) {
+  const tarea = tareas.find((t) => t.id === id);
+  const completed = !tarea.completed;
+  mostrarMensaje(errorTareas, "");
+
+  try {
+    if (!tarea.local) {
+      await pedir(`${API}/todos/${id}`, conJSON("PUT", { completed }));
+    }
+    tareas = tareas.map((t) => (t.id === id ? { ...t, completed } : t));
+  } catch (error) {
+    mostrarMensaje(errorTareas, "No se pudo actualizar la tarea");
+  } finally {
+    pintarTareas();
+  }
+}
+
+async function eliminarTarea(id) {
+  const tarea = tareas.find((t) => t.id === id);
+  mostrarMensaje(errorTareas, "");
+
+  try {
+    if (!tarea.local) {
+      await pedir(`${API}/todos/${id}`, { method: "DELETE" });
+    }
+    tareas = tareas.filter((t) => t.id !== id);
+  } catch (error) {
+    mostrarMensaje(errorTareas, "No se pudo eliminar la tarea");
+  } finally {
+    pintarTareas();
+  }
+}
+
+
 // 8. EVENTOS
-// =====================================================
+
 formLogin.addEventListener("submit", iniciarSesion);
 btnSalir.addEventListener("click", () => cerrarSesion());
+formAgregar.addEventListener("submit", agregarTarea);
 
 botonesFiltro.forEach((boton) => {
   boton.addEventListener("click", () => {
@@ -224,7 +289,7 @@ buscador.addEventListener("input", () => {
   pintarTareas();
 });
 
-// =====================================================
+
 // 9. INICIO
-// =====================================================
+
 cargarPanel();
