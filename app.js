@@ -79,7 +79,7 @@ async function iniciarSesion(event) {
       conJSON("POST", { username: inputUsuario.value, password: inputClave.value })
     );
     localStorage.setItem("accessToken", datos.accessToken);
-    mostrarVista("panel"); // temporal: en la etapa 3 aquí va cargarPanel()
+    await cargarPanel();
   } catch (error) {
     if (error.status === 400) {
       mostrarMensaje(errorLogin, "Usuario o contraseña incorrectos");
@@ -101,6 +101,48 @@ function cerrarSesion(mensaje = "") {
 }
 
 // =====================================================
+// 5. PERFIL
+// =====================================================
+function pintarPerfil() {
+  const { image, firstName, lastName, email, phone, address } = usuario;
+  const ciudad = address?.city ?? "Sin registrar";
+
+  perfil.innerHTML = `
+    <div class="perfil">
+      <img src="${image}" alt="Foto de ${firstName}">
+      <div>
+        <h2>${firstName} ${lastName}</h2>
+        <p>Correo: ${email}</p>
+        <p>Teléfono: ${phone}</p>
+        <p>Ciudad: ${ciudad}</p>
+      </div>
+    </div>`;
+}
+
+// Se usa al iniciar sesión y cada vez que se recarga la página
+async function cargarPanel() {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    mostrarVista("login");
+    return;
+  }
+
+  try {
+    usuario = await pedir(`${API}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    pintarPerfil();
+    mostrarVista("panel");
+  } catch (error) {
+    if (error.status === 401) {
+      cerrarSesion("Tu sesión expiró, entra de nuevo");
+    } else {
+      cerrarSesion("No se pudo cargar tu perfil"
+    }
+  }
+}
+
+// =====================================================
 // 8. EVENTOS
 // =====================================================
 formLogin.addEventListener("submit", iniciarSesion);
@@ -109,4 +151,4 @@ btnSalir.addEventListener("click", () => cerrarSesion());
 // =====================================================
 // 9. INICIO
 // =====================================================
-mostrarVista(localStorage.getItem("accessToken") ? "panel" : "login"); // temporal
+cargarPanel();
