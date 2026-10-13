@@ -133,6 +133,7 @@ async function cargarPanel() {
     });
     pintarPerfil();
     mostrarVista("panel");
+    await cargarTareas();
   } catch (error) {
     if (error.status === 401) {
       cerrarSesion("Tu sesión expiró, entra de nuevo");
@@ -140,6 +141,61 @@ async function cargarPanel() {
       cerrarSesion("No se pudo cargar tu perfil");
     }
   }
+}
+
+// =====================================================
+// 6. TAREAS: PEDIR Y PINTAR
+// =====================================================
+async function cargarTareas() {
+  try {
+    const { todos } = await pedir(`${API}/todos/user/${usuario.id}`);
+    tareas = todos;
+    pintarTareas();
+  } catch (error) {
+    mostrarMensaje(errorTareas, "No se pudieron cargar las tareas");
+  }
+}
+
+function pintarContadores() {
+  const total = tareas.length;
+  const completadas = tareas.reduce((suma, t) => suma + (t.completed ? 1 : 0), 0);
+  const pendientes = total - completadas;
+  const porcentaje = total === 0 ? 0 : Math.round((completadas / total) * 100);
+
+  contadores.textContent =
+    `Total: ${total} | Completadas: ${completadas} | Pendientes: ${pendientes} | Avance: ${porcentaje}%`;
+}
+
+function crearItem(tarea) {
+  const li = document.createElement("li");
+  li.className = tarea.completed ? "completada" : "";
+
+  const check = document.createElement("input");
+  check.type = "checkbox";
+  check.checked = tarea.completed;
+
+  const texto = document.createElement("span");
+  texto.textContent = tarea.todo;
+
+  const btnEliminar = document.createElement("button");
+  btnEliminar.type = "button";
+  btnEliminar.textContent = "Eliminar";
+
+  li.append(check, texto, btnEliminar);
+  return li;
+}
+
+function pintarTareas() {
+  pintarContadores();
+
+  const visibles = tareas;
+
+  lista.innerHTML = "";
+  if (visibles.length === 0) {
+    lista.innerHTML = "<li>No hay tareas que mostrar</li>";
+    return;
+  }
+  visibles.forEach((t) => lista.append(crearItem(t)));
 }
 
 // =====================================================
