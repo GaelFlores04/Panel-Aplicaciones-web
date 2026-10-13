@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- VISTA 1: LOGIN -->
+  <main id="vista-login" hidden>
+    <h1>Mi panel</h1>
+    <form id="form-login">
+      <label for="usuario">Usuario</label>
+      <input id="usuario" type="text" value="emilys" required>
+
+      <label for="clave">Contraseña</label>
+      <input id="clave" type="password" value="emilyspass" required>
+
+      <p id="error-login" class="error" hidden></p>
+      <button id="btn-entrar" type="submit">Entrar</button>
+    </form>
+  </main>
+
+  <!-- VISTA 2: PANEL -->
+  <div id="vista-panel" hidden>
+    <header>
+      <h1>Mi panel</h1>
+      <button id="btn-salir" type="button">Cerrar sesión</button>
+    </header>
+
+    <!-- Perfil -->
+    <section id="perfil"></section>
+
+    <!-- Tareas -->
+    <section>
+      <h2>Mis tareas</h2>
+      <p id="contadores"></p>
+
+      <form id="form-agregar">
+        <input id="nueva-tarea" type="text" placeholder="Nueva tarea" aria-label="Nueva tarea">
+        <button type="submit">Agregar</button>
+      </form>
+
+      <div class="controles">
+        <button type="button" class="filtro activo" data-filtro="todas">Todas</button>
+        <button type="button" class="filtro" data-filtro="pendientes">Pendientes</button>
+        <button type="button" class="filtro" data-filtro="completadas">Completadas</button>
+        <input id="buscador" type="search" placeholder="Buscar tarea" aria-label="Buscar tarea">
+      </div>
+
+      <p id="error-tareas" class="error" hidden></p>
+      <ul id="lista"></ul>
+    </section>
+  </div>
+
+  <script src="panel.js"></script>
+</body>
+</html>

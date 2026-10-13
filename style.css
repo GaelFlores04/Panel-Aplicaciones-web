@@ -1,0 +1,45 @@
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: #f3f4f6;
+  color: #222;
+}
+
+[hidden] { display: none; }
+
+section, form#form-login {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+header { display: flex; justify-content: space-between; align-items: center; }
+
+input, button { font: inherit; padding: 0.5rem; }
+input[type="text"], input[type="password"], input[type="search"] { width: 100%; }
+button { cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+label { display: block; margin-top: 0.75rem; }
+.error { color: #b91c1c; }
+
+/* Perfil */
+.perfil { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.perfil img { width: 96px; height: 96px; border-radius: 50%; }
+.perfil p { margin: 0.2rem 0; }
+
+/* Tareas */
+#form-agregar { display: flex; gap: 0.5rem; padding: 0; background: none; }
+.controles { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0; }
+.controles input { flex: 1 1 150px; width: auto; }
+.filtro.activo { background: #0f766e; color: white; }
+
+ul { list-style: none; padding: 0; }
+li { display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem 0; border-top: 1px solid #ddd; }
+li span { flex: 1; }
+li.completada span { text-decoration: line-through; color: #777; }
