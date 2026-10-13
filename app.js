@@ -137,7 +137,7 @@ async function cargarPanel() {
     if (error.status === 401) {
       cerrarSesion("Tu sesión expiró, entra de nuevo");
     } else {
-      cerrarSesion("No se pudo cargar tu perfil"
+      cerrarSesion("No se pudo cargar tu perfil");
     }
   }
 }
