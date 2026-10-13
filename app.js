@@ -188,7 +188,14 @@ function crearItem(tarea) {
 function pintarTareas() {
   pintarContadores();
 
-  const visibles = tareas;
+  const visibles = tareas
+    .filter((t) => {
+      if (filtro === "pendientes") return !t.completed;
+      if (filtro === "completadas") return t.completed;
+      return true;
+    })
+    .filter((t) => t.todo.toLowerCase().includes(busqueda.toLowerCase()))
+    .sort((a, b) => Number(a.completed) - Number(b.completed)); // pendientes primero
 
   lista.innerHTML = "";
   if (visibles.length === 0) {
@@ -203,6 +210,19 @@ function pintarTareas() {
 // =====================================================
 formLogin.addEventListener("submit", iniciarSesion);
 btnSalir.addEventListener("click", () => cerrarSesion());
+
+botonesFiltro.forEach((boton) => {
+  boton.addEventListener("click", () => {
+    filtro = boton.dataset.filtro;
+    botonesFiltro.forEach((b) => b.classList.toggle("activo", b === boton));
+    pintarTareas();
+  });
+});
+
+buscador.addEventListener("input", () => {
+  busqueda = buscador.value;
+  pintarTareas();
+});
 
 // =====================================================
 // 9. INICIO
